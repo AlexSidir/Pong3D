@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pong 3D Game</title>
+  <link rel="stylesheet" href="pong3D.css">
+  <script src="three.min.js"></script>
+  <script src="TrackballControls.js"></script>
+  <link rel=”stylesheet” href=”font-awesome/css/fontawesome.css”>
+</head>
+<body>
+  <span class="label">Single Player</span>
+  <label class="switch">
+    <input type="checkbox" onclick="changeFlag()">
+    <span class="slider round"></span>
+  </label>
+  <span class="label">Double Player</span>
+  <div>
+      <canvas id="mycanvas" width="250" height="500">
+      </canvas>
+      <canvas id="doublePlayerCanvas" width="250" height="500">
+      </canvas>
+  </div>
+  <script type="text/javascript" src="pong3D.js"></script>
+</body>
+</html>
