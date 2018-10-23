@@ -111,8 +111,6 @@ function onDocumentKeyDown(event) {
 const controls = new THREE.TrackballControls( camera, canvas );
 controls.rotateSpeed = 2;
 
-let axesHelper = new THREE.AxesHelper( 2 );//-----------------------------------------------------------------------------------TO BE REMOVED
-scene.add( axesHelper );
 
 function changeFlag() {
   flag = !flag;
@@ -122,7 +120,6 @@ function changeFlag() {
     enableSinglePlayerMode();
   }
 }
-
 function enableDoublePlayerMode() {
 
   doublePlayerCanvas = document.getElementById("doublePlayerCanvas");
