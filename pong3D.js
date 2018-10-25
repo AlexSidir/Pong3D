@@ -35,6 +35,7 @@ const keyCodes = {
   up: 38,
   down: 40
 };
+
 const WIDTH = window.innerWidth/2 - 50;
 const HEIGHT = window.innerHeight/2;
 
@@ -94,7 +95,6 @@ scene.add( firstRacket );
 document.addEventListener("keydown", onDocumentKeyDown, false);
 
 function onDocumentKeyDown(event) {
-
   let keyCode = event.which;
 
   if (keyCode == keyCodes.left) {
@@ -154,19 +154,19 @@ function enableDoublePlayerMode() {
 
     let keyCode = event.which;
 
-    if (keyCode == keyCodes.W) { //W
+    if (keyCode == keyCodes.W) {
       if (secondRacket.position.y < maxRacketPositionY) {
         secondRacket.position.y += racket.speed;
       }
-    } else if (keyCode == keyCodes.Y) {//Y
+    } else if (keyCode == keyCodes.Y) {
       if (secondRacket.position.y > - maxRacketPositionY) {
         secondRacket.position.y -= racket.speed;
       }
-    } else if (keyCode == keyCodes.A) {//A
+    } else if (keyCode == keyCodes.A) {
       if (secondRacket.position.x < maxRacketPositionX) {
         secondRacket.position.x += racket.speed;
       }
-    } else if (keyCode == keyCodes.D) {//D
+    } else if (keyCode == keyCodes.D) {
       if (secondRacket.position.x > - maxRacketPositionX) {
         secondRacket.position.x -= racket.speed;
       }
