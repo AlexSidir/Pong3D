@@ -4,27 +4,37 @@ const box = {
   width: 4,
   length:8,
   depth: 4
-}
+};
 
 const racket = {
   width: box.width / 4,
   height: box.depth / 4,
   segments: 32,
   speed: 0.3
-}
+};
 
 const sphere = {
   radius: 0.1,
   widthSegments: 16,
   heightSegments: 16,
-  maxVelocityLengthOfBox: 0.09,
-  minVelocityLengthOfBox: 0.005,
-  maxVelocity: 0.005,
+  maxVelocityLengthOfBox: 0.05,
+  minVelocityLengthOfBox: 0.01,
+  maxVelocity: 0.02,
   minVelocity: 0.001,
   maxInitialPosition: 1,
   minInitialPosition: -1
-}
+};
 
+const keyCodes = {
+  A: 65,
+  W: 87,
+  Y: 89,
+  D: 68,
+  left: 37,
+  right: 39,
+  up: 38,
+  down: 40
+};
 const WIDTH = window.innerWidth/2 - 50;
 const HEIGHT = window.innerHeight/2;
 
@@ -79,36 +89,35 @@ let planeGeometry = new THREE.PlaneBufferGeometry(racket.width, racket.height, r
 let planeEdges = new THREE.EdgesGeometry( planeGeometry );
 let firstRacket = new THREE.LineSegments( planeEdges, new THREE.LineBasicMaterial({ color: 0xB22222 }));
 firstRacket.position.z = box.length/2;
-scene.add(firstRacket);
+scene.add( firstRacket );
 
 document.addEventListener("keydown", onDocumentKeyDown, false);
 
 function onDocumentKeyDown(event) {
-  //event.preventDefault();
+
   let keyCode = event.which;
 
-  if (keyCode == 37) {
+  if (keyCode == keyCodes.left) {
     if (firstRacket.position.x > - maxRacketPositionX) {
       firstRacket.position.x -= racket.speed;
     }
-  } else if (keyCode == 39) {
+  } else if (keyCode == keyCodes.right) {
     if (firstRacket.position.x < maxRacketPositionX) {
       firstRacket.position.x += racket.speed;
     }
-  } else if (keyCode == 38) {
+  } else if (keyCode == keyCodes.up) {
     if (firstRacket.position.y < maxRacketPositionY) {
       firstRacket.position.y += racket.speed;
     }
-  } else if (keyCode == 40) {
+  } else if (keyCode == keyCodes.down) {
     if (firstRacket.position.y > - maxRacketPositionY) {
       firstRacket.position.y -= racket.speed;
     }
   }
-};
+}
 
 const controls = new THREE.TrackballControls( camera, canvas );
 controls.rotateSpeed = 2;
-
 
 function changeFlag() {
   flag = !flag;
@@ -142,27 +151,27 @@ function enableDoublePlayerMode() {
   document.addEventListener("keydown", onDocumentKeyDown, false);
 
   function onDocumentKeyDown(event) {
-    //event.preventDefault();
+
     let keyCode = event.which;
 
-    if (keyCode == 87) { //W
+    if (keyCode == keyCodes.W) { //W
       if (secondRacket.position.y < maxRacketPositionY) {
         secondRacket.position.y += racket.speed;
       }
-    } else if (keyCode == 89) {//Y
+    } else if (keyCode == keyCodes.Y) {//Y
       if (secondRacket.position.y > - maxRacketPositionY) {
         secondRacket.position.y -= racket.speed;
       }
-    } else if (keyCode == 65) {//A
+    } else if (keyCode == keyCodes.A) {//A
       if (secondRacket.position.x < maxRacketPositionX) {
         secondRacket.position.x += racket.speed;
       }
-    } else if (keyCode == 68) {//D
+    } else if (keyCode == keyCodes.D) {//D
       if (secondRacket.position.x > - maxRacketPositionX) {
         secondRacket.position.x -= racket.speed;
       }
     }
-  };
+  }
 }
 
 function enableSinglePlayerMode() {
@@ -174,56 +183,52 @@ function enableSinglePlayerMode() {
   }
 }
 
-// Render loop
 function render() {
   requestAnimationFrame(render);
 
   if ( ball.position.x > box.width/2 || ball.position.x < -box.width/2 ) { vx = -vx; }
   if ( ball.position.y > box.depth/2 || ball.position.y < -box.depth/2 ) { vy = -vy; }
 
-
   if ( ball.position.z > box.length/2 ) {
-    if( firstRacket.position.x + racket.width/2 > ball.position.x && firstRacket.position.x - racket.width/2 < ball.position.x
-      && firstRacket.position.y + racket.height/2 > ball.position.y && firstRacket.position.y - racket.height/2 < ball.position.y ) {
+    if( firstRacket.position.x + racket.width/2 > ball.position.x && firstRacket.position.x - racket.width/2 < ball.position.x && firstRacket.position.y + racket.height/2 > ball.position.y && firstRacket.position.y - racket.height/2 < ball.position.y ) {
+      vz = -vz;
+    } else if (flag) {
+      let r = confirm("Player 2 wins!");
+      if (r == true) {
+        location.reload();
+      }
+    } else {
+      let r = confirm("Game Over!");
+      if (r == true) {
+        location.reload();
+      }
+    }
+  }
+  if ( ball.position.z < -box.length/2 ) {
+    if (flag) {
+      if( secondRacket.position.x + racket.width/2 > ball.position.x && secondRacket.position.x - racket.width/2 < ball.position.x && secondRacket.position.y + racket.height/2 > ball.position.y && secondRacket.position.y - racket.height/2 < ball.position.y ) {
         vz = -vz;
-      } else if (flag) {
-        let r = confirm("Player 2 wins!");
-        if (r == true) {
-          location.reload();
-        }
       } else {
-        let r = confirm("Game Over!");
+        let r = confirm("Player 1 wins!");
         if (r == true) {
           location.reload();
         }
       }
+    } else {
+      vz = -vz;
     }
-    if ( ball.position.z < -box.length/2 ) {
-      if (flag) {
-        if( secondRacket.position.x + racket.width/2 > ball.position.x && secondRacket.position.x - racket.width/2 < ball.position.x
-          && secondRacket.position.y + racket.height/2 > ball.position.y && secondRacket.position.y - racket.height/2 < ball.position.y ) {
-            vz = -vz;
-          } else {
-            let r = confirm("Player 1 wins!");
-            if (r == true) {
-              location.reload();
-            }
-          }
-        } else {
-          vz = -vz;
-        }
-      }
+  }
 
-      ball.position.y += vy;
-      ball.position.z += vz;
-      ball.position.x += vx;
+  ball.position.y += vy;
+  ball.position.z += vz;
+  ball.position.x += vx;
 
-      controls.update();
-      renderer.render(scene, camera);
-      if (flag) {
-        controls2.update();
-        renderer2.render(scene, camera2);
-      }
-    }
+  controls.update();
+  renderer.render(scene, camera);
+  if (flag) {
+    controls2.update();
+    renderer2.render(scene, camera2);
+  }
+}
 
-    render();
+render();
