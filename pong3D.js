@@ -26,13 +26,13 @@ const maxRacketPositionX = box.width/2 - racket.width/2;
 const racketPositionZ = box.length/2;
 
 const maxVelocityLengthOfBox = 0.09;
-const maxVelocity = 0.01;
-const minVelocity = 0.005;
+const maxVelocity = 0.005;
+const minVelocity = 0.001;
 
 const maxInitialPosition = 1;
 const minInitialPosition = -1;
 
-const speedOfRacket = 0.1;
+const speedOfRacket = 0.3;
 
 const cameraPosition = 6.5;
 
@@ -181,18 +181,50 @@ function render() {
 
   if ( sphere.position.x > box.width/2 || sphere.position.x < -box.width/2 ) { vx = -vx; }
   if ( sphere.position.y > box.depth/2 || sphere.position.y < -box.depth/2 ) { vy = -vy; }
-  if ( sphere.position.z > box.length/2 || sphere.position.z < -box.length/2 ) { vz = -vz; }
 
-  sphere.position.y += vy;
-  sphere.position.z += vz;
-  sphere.position.x += vx;
 
-  controls.update();
-  renderer.render(scene, camera);
-  if(flag) {
-    controls2.update();
-    renderer2.render(scene, camera2);
-  }
-}
+  if ( sphere.position.z > box.length/2 ) {
+    if( firstRacket.position.x + racket.width/2 > sphere.position.x && firstRacket.position.x - racket.width/2 < sphere.position.x
+      && firstRacket.position.y + racket.height/2 > sphere.position.y && firstRacket.position.y - racket.height/2 < sphere.position.y ) {
+        vz = -vz;
+      } else if (flag) {
+        var r = confirm("Player 2 wins!");
+        if (r == true) {
+          location.reload();
+        }
+      } else {
+        var r = confirm("Game Over!");
+        if (r == true) {
+          location.reload();
+        }
+      }
+    }
+    if ( sphere.position.z < -box.length/2 ) {
+      if (flag) {
+        if( secondRacket.position.x + racket.width/2 > sphere.position.x && secondRacket.position.x - racket.width/2 < sphere.position.x
+          && secondRacket.position.y + racket.height/2 > sphere.position.y && secondRacket.position.y - racket.height/2 < sphere.position.y ) {
+            vz = -vz;
+          } else {
+            var r = confirm("Player 1 wins!");
+            if (r == true) {
+              location.reload();
+            }
+          }
+        } else {
+          vz = -vz;
+        }
+      }
 
-render();
+      sphere.position.y += vy;
+      sphere.position.z += vz;
+      sphere.position.x += vx;
+
+      controls.update();
+      renderer.render(scene, camera);
+      if (flag) {
+        controls2.update();
+        renderer2.render(scene, camera2);
+      }
+    }
+
+    render();
