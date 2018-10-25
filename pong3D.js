@@ -9,13 +9,20 @@ const box = {
 const racket = {
   width: box.width / 4,
   height: box.depth / 4,
-  segments: 32
+  segments: 32,
+  speed: 0.3
 }
 
-const sphereSize = {
+const sphere = {
   radius: 0.1,
   widthSegments: 16,
-  heightSegments: 16
+  heightSegments: 16,
+  maxVelocityLengthOfBox: 0.09,
+  minVelocityLengthOfBox: 0.005,
+  maxVelocity: 0.005,
+  minVelocity: 0.001,
+  maxInitialPosition: 1,
+  minInitialPosition: -1
 }
 
 const WIDTH = window.innerWidth/2 - 50;
@@ -25,24 +32,15 @@ const maxRacketPositionY = box.depth/2 - racket.height/2;
 const maxRacketPositionX = box.width/2 - racket.width/2;
 const racketPositionZ = box.length/2;
 
-const maxVelocityLengthOfBox = 0.09;
-const maxVelocity = 0.005;
-const minVelocity = 0.001;
-
-const maxInitialPosition = 1;
-const minInitialPosition = -1;
-
-const speedOfRacket = 0.3;
-
 const cameraPosition = 6.5;
 
-let vx = Math.random() * (maxVelocity - minVelocity) + minVelocity;
-let vy = Math.random() * (maxVelocity - minVelocity) + minVelocity;
-let vz = Math.random() * (maxVelocityLengthOfBox - minVelocity) + minVelocity;
+let vx = Math.random() * (sphere.maxVelocity - sphere.minVelocity) + sphere.minVelocity;
+let vy = Math.random() * (sphere.maxVelocity - sphere.minVelocity) + sphere.minVelocity;
+let vz = Math.random() * (sphere.maxVelocityLengthOfBox - sphere.minVelocityLengthOfBox) + sphere.minVelocityLengthOfBox;
 
-let initialPositionX = Math.random() * (maxInitialPosition - minInitialPosition) + minInitialPosition;
-let initialPositionY = Math.random() * (maxInitialPosition - minInitialPosition) + minInitialPosition;
-let initialPositionZ = Math.random() * (maxInitialPosition - minInitialPosition ) + minInitialPosition;
+let initialPositionX = Math.random() * (sphere.maxInitialPosition - sphere.minInitialPosition) + sphere.minInitialPosition;
+let initialPositionY = Math.random() * (sphere.maxInitialPosition - sphere.minInitialPosition) + sphere.minInitialPosition;
+let initialPositionZ = Math.random() * (sphere.maxInitialPosition - sphere.minInitialPosition) + sphere.minInitialPosition;
 
 let doublePlayerCanvas;
 let renderer2;
@@ -68,13 +66,13 @@ let line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 
 scene.add( line );
 
 //Sphere
-let sphereGometry = new THREE.SphereGeometry( sphereSize.radius, sphereSize.widthSegments, sphereSize.heightSegments );
+let sphereGometry = new THREE.SphereGeometry( sphere.radius, sphere.widthSegments, sphere.heightSegments );
 let sphereMaterial = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-sphere = new THREE.Mesh( sphereGometry, sphereMaterial );
-sphere.position.x = initialPositionX;
-sphere.position.y = initialPositionY;
-sphere.position.z = initialPositionZ;
-scene.add( sphere );
+ball = new THREE.Mesh( sphereGometry, sphereMaterial );
+ball.position.x = initialPositionX;
+ball.position.y = initialPositionY;
+ball.position.z = initialPositionZ;
+scene.add( ball );
 
 //Racket Single Player
 let planeGeometry = new THREE.PlaneBufferGeometry(racket.width, racket.height, racket.segments);
@@ -91,19 +89,19 @@ function onDocumentKeyDown(event) {
 
   if (keyCode == 37) {
     if (firstRacket.position.x > - maxRacketPositionX) {
-      firstRacket.position.x -= speedOfRacket;
+      firstRacket.position.x -= racket.speed;
     }
   } else if (keyCode == 39) {
     if (firstRacket.position.x < maxRacketPositionX) {
-      firstRacket.position.x += speedOfRacket;
+      firstRacket.position.x += racket.speed;
     }
   } else if (keyCode == 38) {
     if (firstRacket.position.y < maxRacketPositionY) {
-      firstRacket.position.y += speedOfRacket;
+      firstRacket.position.y += racket.speed;
     }
   } else if (keyCode == 40) {
     if (firstRacket.position.y > - maxRacketPositionY) {
-      firstRacket.position.y -= speedOfRacket;
+      firstRacket.position.y -= racket.speed;
     }
   }
 };
@@ -120,6 +118,7 @@ function changeFlag() {
     enableSinglePlayerMode();
   }
 }
+
 function enableDoublePlayerMode() {
 
   doublePlayerCanvas = document.getElementById("doublePlayerCanvas");
@@ -148,19 +147,19 @@ function enableDoublePlayerMode() {
 
     if (keyCode == 87) { //W
       if (secondRacket.position.y < maxRacketPositionY) {
-        secondRacket.position.y += speedOfRacket;
+        secondRacket.position.y += racket.speed;
       }
     } else if (keyCode == 89) {//Y
       if (secondRacket.position.y > - maxRacketPositionY) {
-        secondRacket.position.y -= speedOfRacket;
+        secondRacket.position.y -= racket.speed;
       }
     } else if (keyCode == 65) {//A
       if (secondRacket.position.x < maxRacketPositionX) {
-        secondRacket.position.x += speedOfRacket;
+        secondRacket.position.x += racket.speed;
       }
     } else if (keyCode == 68) {//D
       if (secondRacket.position.x > - maxRacketPositionX) {
-        secondRacket.position.x -= speedOfRacket;
+        secondRacket.position.x -= racket.speed;
       }
     }
   };
@@ -179,33 +178,33 @@ function enableSinglePlayerMode() {
 function render() {
   requestAnimationFrame(render);
 
-  if ( sphere.position.x > box.width/2 || sphere.position.x < -box.width/2 ) { vx = -vx; }
-  if ( sphere.position.y > box.depth/2 || sphere.position.y < -box.depth/2 ) { vy = -vy; }
+  if ( ball.position.x > box.width/2 || ball.position.x < -box.width/2 ) { vx = -vx; }
+  if ( ball.position.y > box.depth/2 || ball.position.y < -box.depth/2 ) { vy = -vy; }
 
 
-  if ( sphere.position.z > box.length/2 ) {
-    if( firstRacket.position.x + racket.width/2 > sphere.position.x && firstRacket.position.x - racket.width/2 < sphere.position.x
-      && firstRacket.position.y + racket.height/2 > sphere.position.y && firstRacket.position.y - racket.height/2 < sphere.position.y ) {
+  if ( ball.position.z > box.length/2 ) {
+    if( firstRacket.position.x + racket.width/2 > ball.position.x && firstRacket.position.x - racket.width/2 < ball.position.x
+      && firstRacket.position.y + racket.height/2 > ball.position.y && firstRacket.position.y - racket.height/2 < ball.position.y ) {
         vz = -vz;
       } else if (flag) {
-        var r = confirm("Player 2 wins!");
+        let r = confirm("Player 2 wins!");
         if (r == true) {
           location.reload();
         }
       } else {
-        var r = confirm("Game Over!");
+        let r = confirm("Game Over!");
         if (r == true) {
           location.reload();
         }
       }
     }
-    if ( sphere.position.z < -box.length/2 ) {
+    if ( ball.position.z < -box.length/2 ) {
       if (flag) {
-        if( secondRacket.position.x + racket.width/2 > sphere.position.x && secondRacket.position.x - racket.width/2 < sphere.position.x
-          && secondRacket.position.y + racket.height/2 > sphere.position.y && secondRacket.position.y - racket.height/2 < sphere.position.y ) {
+        if( secondRacket.position.x + racket.width/2 > ball.position.x && secondRacket.position.x - racket.width/2 < ball.position.x
+          && secondRacket.position.y + racket.height/2 > ball.position.y && secondRacket.position.y - racket.height/2 < ball.position.y ) {
             vz = -vz;
           } else {
-            var r = confirm("Player 1 wins!");
+            let r = confirm("Player 1 wins!");
             if (r == true) {
               location.reload();
             }
@@ -215,9 +214,9 @@ function render() {
         }
       }
 
-      sphere.position.y += vy;
-      sphere.position.z += vz;
-      sphere.position.x += vx;
+      ball.position.y += vy;
+      ball.position.z += vz;
+      ball.position.x += vx;
 
       controls.update();
       renderer.render(scene, camera);
