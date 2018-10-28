@@ -1,4 +1,19 @@
-let flag = false;
+let flag;
+
+//The cookie is used to store the users preference, on if
+//the game is in single player or double player mode
+//However, this does NOT work on Chrome, but it works of Firefox
+let cookie = document.cookie;
+let boolean = cookie.replace("doublePlayerMode=","");
+if (boolean === "true") {
+  document.getElementById("toggle").checked = true;
+  flag = true;
+} else if (boolean === "false") {
+  document.getElementById("toggle").checked = false;
+  flag = false;
+} else {
+  flag = false;
+}
 
 const box = {
   width: 4,
@@ -36,18 +51,19 @@ const keyCodes = {
   down: 40
 };
 
-const WIDTH = window.innerWidth/2 - 50;
-const HEIGHT = window.innerHeight/2;
+const width = window.innerWidth/2 - 50;
+const height = window.innerHeight/2;
 
 const maxRacketPositionY = box.depth/2 - racket.height/2;
 const maxRacketPositionX = box.width/2 - racket.width/2;
 const racketPositionZ = box.length/2;
 
 const cameraPosition = 6.5;
+const cameraRotateSpeed = 2;
 
-let vx = Math.random() * (sphere.maxVelocity - sphere.minVelocity) + sphere.minVelocity;
-let vy = Math.random() * (sphere.maxVelocity - sphere.minVelocity) + sphere.minVelocity;
-let vz = Math.random() * (sphere.maxVelocityLengthOfBox - sphere.minVelocityLengthOfBox) + sphere.minVelocityLengthOfBox;
+let velocityX = Math.random() * (sphere.maxVelocity - sphere.minVelocity) + sphere.minVelocity;
+let velocityY = Math.random() * (sphere.maxVelocity - sphere.minVelocity) + sphere.minVelocity;
+let velocityZ = Math.random() * (sphere.maxVelocityLengthOfBox - sphere.minVelocityLengthOfBox) + sphere.minVelocityLengthOfBox;
 
 let initialPositionX = Math.random() * (sphere.maxInitialPosition - sphere.minInitialPosition) + sphere.minInitialPosition;
 let initialPositionY = Math.random() * (sphere.maxInitialPosition - sphere.minInitialPosition) + sphere.minInitialPosition;
@@ -60,7 +76,7 @@ let camera2;
 
 let canvas = document.getElementById("mycanvas");
 const renderer = new THREE.WebGLRenderer({canvas:canvas});
-renderer.setSize(WIDTH, HEIGHT);
+renderer.setSize(width, height);
 renderer.setClearColor('rgb(0,0,0)');
 
 const scene = new THREE.Scene();
@@ -70,13 +86,11 @@ camera.position.z = cameraPosition;
 const ambientLight = new THREE.AmbientLight(0x909090);
 scene.add(ambientLight);
 
-//Outter Box
 let geometry = new THREE.BoxBufferGeometry( box.width, box.depth , box.length);
 let edges = new THREE.EdgesGeometry( geometry );
 let line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0x11ee77 } ) );
 scene.add( line );
 
-//Sphere
 let sphereGometry = new THREE.SphereGeometry( sphere.radius, sphere.widthSegments, sphere.heightSegments );
 let sphereMaterial = new THREE.MeshBasicMaterial( {color: 0xffff00} );
 ball = new THREE.Mesh( sphereGometry, sphereMaterial );
@@ -85,7 +99,6 @@ ball.position.y = initialPositionY;
 ball.position.z = initialPositionZ;
 scene.add( ball );
 
-//Racket Single Player
 let planeGeometry = new THREE.PlaneBufferGeometry(racket.width, racket.height, racket.segments);
 let planeEdges = new THREE.EdgesGeometry( planeGeometry );
 let firstRacket = new THREE.LineSegments( planeEdges, new THREE.LineBasicMaterial({ color: 0xB22222 }));
@@ -117,7 +130,7 @@ function onDocumentKeyDown(event) {
 }
 
 const controls = new THREE.TrackballControls( camera, canvas );
-controls.rotateSpeed = 2;
+controls.rotateSpeed = cameraRotateSpeed;
 
 function changeFlag() {
   flag = !flag;
@@ -129,18 +142,19 @@ function changeFlag() {
 }
 
 function enableDoublePlayerMode() {
+  document.cookie = "doublePlayerMode=true";
 
   doublePlayerCanvas = document.getElementById("doublePlayerCanvas");
   doublePlayerCanvas.style.display="";
   renderer2 = new THREE.WebGLRenderer({canvas:doublePlayerCanvas});
-  renderer2.setSize(WIDTH, HEIGHT);
+  renderer2.setSize(width, height);
   renderer2.setClearColor('rgb(0,0,0)');
 
   camera2 = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
   camera2.position.z = - cameraPosition;
 
   controls2 = new THREE.TrackballControls( camera2, doublePlayerCanvas );
-  controls2.rotateSpeed = 2;
+  controls2.rotateSpeed = cameraRotateSpeed;
 
   let secondRacketGeometry = new THREE.PlaneBufferGeometry(racket.width, racket.height, racket.segments);
   let secondRacketEdges = new THREE.EdgesGeometry( secondRacketGeometry );
@@ -175,6 +189,8 @@ function enableDoublePlayerMode() {
 }
 
 function enableSinglePlayerMode() {
+  document.cookie = "doublePlayerMode=false";
+
   if(doublePlayerCanvas != null) {
     doublePlayerCanvas.style.display="none";
   }
@@ -183,15 +199,19 @@ function enableSinglePlayerMode() {
   }
 }
 
+if (flag === true) {
+  enableDoublePlayerMode();
+}
+
 function render() {
   requestAnimationFrame(render);
 
-  if ( ball.position.x > box.width/2 || ball.position.x < -box.width/2 ) { vx = -vx; }
-  if ( ball.position.y > box.depth/2 || ball.position.y < -box.depth/2 ) { vy = -vy; }
+  if ( ball.position.x > box.width/2 || ball.position.x < -box.width/2 ) { velocityX = -velocityX; }
+  if ( ball.position.y > box.depth/2 || ball.position.y < -box.depth/2 ) { velocityY = -velocityY; }
 
   if ( ball.position.z > box.length/2 ) {
     if( firstRacket.position.x + racket.width/2 > ball.position.x && firstRacket.position.x - racket.width/2 < ball.position.x && firstRacket.position.y + racket.height/2 > ball.position.y && firstRacket.position.y - racket.height/2 < ball.position.y ) {
-      vz = -vz;
+      velocityZ = -velocityZ;
     } else if (flag) {
       let r = confirm("Player 2 wins!");
       if (r == true) {
@@ -207,7 +227,7 @@ function render() {
   if ( ball.position.z < -box.length/2 ) {
     if (flag) {
       if( secondRacket.position.x + racket.width/2 > ball.position.x && secondRacket.position.x - racket.width/2 < ball.position.x && secondRacket.position.y + racket.height/2 > ball.position.y && secondRacket.position.y - racket.height/2 < ball.position.y ) {
-        vz = -vz;
+        velocityZ = -velocityZ;
       } else {
         let r = confirm("Player 1 wins!");
         if (r == true) {
@@ -215,13 +235,13 @@ function render() {
         }
       }
     } else {
-      vz = -vz;
+      velocityZ = -velocityZ;
     }
   }
 
-  ball.position.y += vy;
-  ball.position.z += vz;
-  ball.position.x += vx;
+  ball.position.y += velocityY;
+  ball.position.z += velocityZ;
+  ball.position.x += velocityX;
 
   controls.update();
   renderer.render(scene, camera);

@@ -11,14 +11,14 @@
 <body>
   <span class="label">Single Player</span>
   <label class="switch">
-    <input type="checkbox" onclick="changeFlag()">
-    <span class="slider round"></span>
+    <input type="checkbox" id="toggle" onclick="changeFlag()">
+    <span class="slider round" ></span>
   </label>
   <span class="label">Double Player</span>
   <div>
-    <canvas id="mycanvas" width="250" height="500">
+    <canvas id="mycanvas">
     </canvas>
-    <canvas id="doublePlayerCanvas" width="250" height="500">
+    <canvas id="doublePlayerCanvas">
     </canvas>
   </div>
   <script type="text/javascript" src="pong3D.js"></script>
